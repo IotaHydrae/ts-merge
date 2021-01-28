@@ -8,7 +8,7 @@ def prepare_files(directory_path, mv_name='new'):
     new_file_list = []
 
     top_num = int(file_list[0].split('n')[1])
-    # 获取顶层文件
+    # 获取顶层文件序号
     for file in file_list:
         tmp = file.split('n')
         if int(tmp[1]) > top_num:
@@ -21,6 +21,13 @@ def prepare_files(directory_path, mv_name='new'):
             if int(item.split('n')[1]) == num:
                 new_file_list.append(item)
 
+    # 处理同名文件
+    if mv_name == 'new' and os.path.exists('./new.ts'):
+        os.remove('./new.ts')
+    elif mv_name != 'new' and os.path.exists(f'./{mv_name}.ts'):
+        os.remove(f'./{mv_name}.ts')
+
+    # 读取和输出
     mv = open(f'./{mv_name}.ts', 'ab')
 
     for item in new_file_list:
