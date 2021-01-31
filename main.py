@@ -7,40 +7,73 @@ def prepare_files(directory_path, mv_name='new'):
     file_list = os.listdir(directory_path)
     new_file_list = []
 
-    top_num = int(file_list[0].split('n')[1])
-    # 获取顶层文件序号
-    for file in file_list:
-        tmp = file.split('n')
-        if int(tmp[1]) > top_num:
-            top_num = int(tmp[1])
-    print(top_num)
+    # 模式一
+    try:
+        top_num = int(file_list[0].split('n')[1])
+        # 获取顶层文件
+        for file in file_list:
+            tmp = file.split('n')
+            if int(tmp[1]) > top_num:
+                top_num = int(tmp[1])
+        # print(top_num)
+        # 处理原文件列表
+        for num in range(top_num + 1):
+            for item in file_list:
+                if int(item.split('n')[1]) == num:
+                    new_file_list.append(item)
+    except:
+        print("this folder saved as another mode. changing...")
 
-    # 处理原文件列表
-    for num in range(top_num+1):
-        for item in file_list:
-            if int(item.split('n')[1]) == num:
-                new_file_list.append(item)
+        # 模式二
+        try:
+            top_num = int(file_list[0])
+            for file in file_list:
+                # 简单判断跳过m3u8文件
+                if len(file) > 30:
+                    continue
+                if int(file) > top_num:
+                    top_num = int(file)
+            # print(top_num)
 
-    # 处理同名文件
-    if mv_name == 'new' and os.path.exists('./new.ts'):
-        os.remove('./new.ts')
-    elif mv_name != 'new' and os.path.exists(f'./{mv_name}.ts'):
-        os.remove(f'./{mv_name}.ts')
+            for num in range(top_num + 1):
+                for item in file_list:
+                    if len(item) > 30:
+                        continue
+                    if int(item) == num:
+                        new_file_list.append(item)
+        except:
+            print("无法识别文件夹类型，程序退出中")
+            exit()
 
-    # 读取和输出
+
+    # 文件的读取与写入
+    try:
+        chose=''
+        if os.path.exists(f'./{mv_name}.ts'):
+            chose=input(f"文件 {mv_name}.ts 已存在，是否覆盖？[y/n]")
+            if chose == 'y':
+                os.remove(f"./{mv_name}.ts")
+            elif chose == 'n':
+                mv_name=input("请输入新文件名(带后缀ts): ")
+                mv_name=mv_name.split('.')[0]
+            else:
+                raise AttributeError
+    except AttributeError as result:
+        print("无效输入，程序退出中")
+        exit()
+
+
     mv = open(f'./{mv_name}.ts', 'ab')
 
     for item in new_file_list:
+        print(f"读取文件中: {item}")
         fd_item = open(directory_path+item, 'rb')
         content = fd_item.read()
         fd_item.close()
         mv.write(content)
     mv.close()
-
-
-
+    print(f"已写入到文件: {mv_name}.ts")
     pass
-
 
 def main():
     if len(sys.argv) < 2:
@@ -66,3 +99,6 @@ def main():
 if __name__ == '__main__':
     if main() == -1:
         print("Program running error")
+        exit()
+    
+    print("程序运行完毕")
